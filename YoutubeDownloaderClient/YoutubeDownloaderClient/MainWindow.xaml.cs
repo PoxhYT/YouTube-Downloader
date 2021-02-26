@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace First
+namespace YoutubeDownloaderClient
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -16,12 +16,11 @@ namespace First
         public MainWindow()
         {
             InitializeComponent();
-
         }
 
         private async void Download_Click(object sender, RoutedEventArgs e)
         {
-            if(URL_Input.Text.Trim().Length != 0)
+            if (URL_Input.Text.Trim().Length != 0)
             {
                 Message.Text = "Loading...";
                 await CreatePythonConnection("python", URL_Input.Text);
@@ -49,5 +48,4 @@ namespace First
             await process.WaitForExitAsync();
         }
     }
-
 }

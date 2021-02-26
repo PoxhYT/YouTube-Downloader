@@ -1,7 +1,7 @@
-﻿<Application x:Class="First.App"
+﻿<Application x:Class="YoutubeDownloaderClient.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:First"
+             xmlns:local="clr-namespace:YoutubeDownloaderClient"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

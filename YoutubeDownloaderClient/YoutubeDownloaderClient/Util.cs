@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace First
+namespace YoutubeDownloaderClient
 {
     public static class Util
     {
-        public static Task WaitForExitAsync(this Process process,
-        CancellationToken cancellationToken = default(CancellationToken))
+
+        public static Task WaitForExitAsync(this Process process, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (process.HasExited) return Task.CompletedTask;
 
