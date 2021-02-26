@@ -1,0 +1,20 @@
+{
+  "name": "YouTube-Downloader",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://github.com/PoxhYT/YouTube-Downloader",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "start": "rm -rf dist && tsc && NODE_ENV=production node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "typescript": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.11",
+    "nodemon": "^2.0.6",
+    "ts-node-dev": "^1.1.6"
+  }
+}
