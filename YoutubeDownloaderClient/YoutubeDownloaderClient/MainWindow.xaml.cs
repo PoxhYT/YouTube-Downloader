@@ -23,29 +23,9 @@ namespace YoutubeDownloaderClient
             if (URL_Input.Text.Trim().Length != 0)
             {
                 Message.Text = "Loading...";
-                await CreatePythonConnection("python", URL_Input.Text);
+                await HttpRequest.getSong(URL_Input.Text);
                 Message.Text = "Done";
             }
-        }
-
-        private async Task CreatePythonConnection(string pythonPath, string url)
-        {
-            // Create Process Info
-            var psi = new ProcessStartInfo();
-            psi.FileName = pythonPath;
-
-            // Provide script and arguments
-            var script = "App.py";
-            var playlistUrl = url;
-
-            psi.Arguments = $"\"{script}\" \"{playlistUrl}\"";
-
-            // Process configuration
-            psi.UseShellExecute = true;
-            psi.CreateNoWindow = false;
-
-            var process = Process.Start(psi);
-            await process.WaitForExitAsync();
         }
     }
 }
