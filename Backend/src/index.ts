@@ -1,63 +1,55 @@
+import { downloadSong, getId, getName } from "./common";
+
 import bodyParser from "body-parser";
 import express from "express";
-import ytdl from "ytdl-core";
-import fetch from "node-fetch";
-import fs from "fs";
+import helmet from "helmet";
+import path from "path";
 
-async function main() {
-  const app = express();
+const app = express();
 
-  app.use(
-    bodyParser.urlencoded({
-      extended: true,
-    })
-  );
+app.use(helmet());
 
-  app.use(bodyParser.json())
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 
-  app.get("/", (req, res) => {
-    res.json({ message: "Hey" });
-  });
+app.use(bodyParser.json());
 
-  app.post("/song", async (req, res) => {
-    const { url, info } = req.body;
-    if(info === "true") {
-      const image = "https://img.youtube.com/vi/" + getId(url) + "/maxresdefault.jpg";
-      const name = await getName(url);
-      console.log(name);
-      res.json({
-        imageurl:image,
-        songName:name      
-      }) 
-      return;     
-    }
-    const stream = ytdl(url, {
-      quality: "highest",
-      filter: "audioonly",
-      format: {bitrate:320}
-    });
-    stream.pipe(fs.createWriteStream("Test.mp3"));
-  });
+app.get("/", (req, res) => {
+  res.json({ message: "Hey" });
+});
 
-  const port = process.env.PORT || 3001;
-  app.listen(port, () =>
-    console.log(`Server is running at: http://localhost:${port}`)
-  );
-}
+app.post("/song", async (req, res) => {
+  const { url, info } = req.body;
 
-function getId(url:string) {
-  if(url.includes("youtube.com")) {
-    const array = url.split("=")  
-    return array[array.length-1];
+  if (!url) {
+    res.status(400).json({ message: "Url Missing" });
+    return;
+  } else if (typeof url !== "string") {
+    res.status(400).json({ message: "Url Missing" });
     return;
   }
-  const array = url.split("/")  
-  return array[array.length-1];
-}
 
-async function getName(url:string) {
-  const data = JSON.parse(await (await fetch("https://noembed.com/embed?url=https://www.youtube.com/watch?v=" + getId(url))).text());
-  return data.title;
-}
+  if (info === "true") {
+    const image =
+      "https://img.youtube.com/vi/" + getId(url) + "/maxresdefault.jpg";
+    const name = await getName(url);
+    console.log(name);
+    res.json({
+      imageurl: image,
+      songName: name,
+    });
+    return;
+  }
 
-main();
+  downloadSong(getId(url), (pathToFile) => {
+    res.sendFile(path.join(__dirname, "../" + pathToFile));
+  });
+});
+
+const port = process.env.PORT || 3001;
+app.listen(port, () =>
+  console.log(`Server is running at: http://localhost:${port}`)
+);
