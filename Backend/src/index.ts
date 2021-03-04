@@ -45,7 +45,7 @@ app.post("/song", async (req, res) => {
   }
 
   downloadSong(getId(url), (pathToFile) => {
-    res.sendFile(path.join(__dirname, "../" + pathToFile));
+    res.sendFile(pathToFile);
   });
 });
 

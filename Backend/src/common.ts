@@ -3,6 +3,7 @@ import YoutubeMp3Downloader from "youtube-mp3-downloader";
 import fetch from "node-fetch";
 import rimraf from "rimraf";
 import fs from "fs";
+import path from "path";
 
 const pathToFfmpeg = "./ffmpeg/bin/ffmpeg.exe";
 
@@ -30,21 +31,24 @@ async function getName(url: string) {
   return data.title;
 }
 
-function downloadSong(
+async function downloadSong(
   id: string,
   callback: (fileOutput: string) => void
-): void {
-  const path = `./downloads/${id}/`;
+): Promise<void> {
+  const downloadPath = `./downloads/${id}/`;
 
-  if (fs.existsSync(path)) {
-    rimraf.sync(path);
+  if (fs.existsSync(path.join(process.cwd(), downloadPath))) {
+    rimraf.sync(path.join(process.cwd(), downloadPath));
+    await delay(50);
   }
 
-  fs.mkdirSync(path);
+    fs.mkdirSync(path.join(process.cwd(), downloadPath).slice(0, -1));
+
+  const outputPath = path.join(process.cwd(), downloadPath)
 
   var YD = new YoutubeMp3Downloader({
     ffmpegPath: pathToFfmpeg,
-    outputPath: path,
+    outputPath: outputPath,
     youtubeVideoQuality: "highestaudio",
     queueParallelism: 2,
     progressTimeout: 2000,
@@ -54,10 +58,14 @@ function downloadSong(
   YD.download(id);
 
   YD.on("finished", () => {
-    const filePath = fs.readdirSync(path)[0];
+    const filePath = fs.readdirSync(outputPath)[0];
 
-    callback(path.substring(1) + filePath);
-  });
+    callback(path.join(outputPath, filePath));
+  });      
+}
+
+function delay(ms: number) {
+  return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
 export { downloadSong, getId, getName };

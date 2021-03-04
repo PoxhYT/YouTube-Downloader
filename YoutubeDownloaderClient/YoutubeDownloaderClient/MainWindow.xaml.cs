@@ -18,14 +18,20 @@ namespace YoutubeDownloaderClient
             InitializeComponent();
         }
 
-        private async void Download_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (URL_Input.Text.Trim().Length != 0)
-            {
-                Message.Text = "Loading...";
-                await HttpRequest.getSong(URL_Input.Text);
-                Message.Text = "Done";
-            }
+            var uri = "https://discord.gg/deawPtpcCF";
+            var psi = new System.Diagnostics.ProcessStartInfo();
+            psi.UseShellExecute = true;
+            psi.FileName = uri;
+            System.Diagnostics.Process.Start(psi);
+        }
+
+        private void start_btn_Click(object sender, RoutedEventArgs e)
+        {
+            Download downloadWindow = new Download();
+            this.Close();
+            downloadWindow.Show();
         }
     }
 }

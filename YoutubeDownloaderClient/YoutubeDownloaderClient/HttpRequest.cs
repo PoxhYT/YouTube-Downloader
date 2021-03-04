@@ -43,7 +43,7 @@ namespace YoutubeDownloaderClient
 
             var content = new FormUrlEncodedContent(values);
 
-            var response = await client.PostAsync("http://localhost:3001/song", content);
+            var response = await client.PostAsync("http://savagemc.net:3001/song", content);
 
             string fileName = info.songName + ".mp3";
 
@@ -79,7 +79,7 @@ namespace YoutubeDownloaderClient
                 { "info", "true" }
             };
             var content = new FormUrlEncodedContent(values);
-            var response = await (await client.PostAsync("http://localhost:3001/song", content)).Content.ReadAsStringAsync();
+            var response = await (await client.PostAsync("http://savagemc.net:3001/song", content)).Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<MusicInfo>(response);
         }
 
