@@ -7,6 +7,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.ComponentModel;
 
 namespace YoutubeDownloaderClient
 {
@@ -14,72 +15,37 @@ namespace YoutubeDownloaderClient
     {
         private static readonly HttpClient client = new HttpClient();
 
-        public static async Task getSong(string url)
-        {
-            var info = await getInfos(url);
+        private static MusicInfo info;
+        private static string url;
+        private static string outputPath;
 
-            Console.WriteLine(info.imageurl);
+        public static async Task getSong(string localurl)
+        {
+            var localinfo = await getInfos(localurl);
 
             WebClient webclient = new WebClient();
+            var localoutputPath = $"./{localinfo.songName}.jpg";
 
-            var image = "https://www.interactivesearchmarketing.com/wp-content/uploads/2014/06/png-vs-jpeg.jpg";
+            webclient.DownloadFileAsync(new Uri(localinfo.imageurl), localoutputPath);
 
-            //webclient.DownloadFile("https://firebasestorage.googleapis.com/v0/b/angular-letschat.appspot.com/o/preset%2FprofilePictures%2Ffemale-avatar.png?alt=media&token=f6043a05-e29b-4010-9cc5-a0adc90a0fb1", "hello.png");
+            info = localinfo;
+            url = localurl;
+            outputPath = localoutputPath;
 
-            byte[] imageBytes = null;
-
-            try
-            {
-               imageBytes = await webclient.DownloadDataTaskAsync(new Uri(image));
-            }
-            catch { Console.WriteLine("test!"); }
-                  
-            //var imageBytes = webclient.DownloadData(url);
-
-            var values = new Dictionary<string, string>
-            {
-                { "url", url },
-            };
-
-            var content = new FormUrlEncodedContent(values);
-
-            var response = await client.PostAsync("http://savagemc.net:3001/song", content);
-
-            string fileName = info.songName + ".mp3";
-
-            await using var ms = await response.Content.ReadAsStreamAsync();
-            await using var fs = File.Create(fileName);
-            ms.Seek(0, SeekOrigin.Begin);
-            ms.CopyTo(fs);
-            fs.Close();
-            ms.Close();
-            return;
-            AddMp3Tags(fileName);
-            var tFile = TagLib.File.Create(fileName);
-            
-            var cover = new TagLib.Id3v2.AttachmentFrame
-            {
-                Type = TagLib.PictureType.FrontCover,
-                Description = "Cover",
-                MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg,
-                Data = imageBytes,
-                TextEncoding = TagLib.StringType.UTF16
-            };
-
-            tFile.Tag.Pictures = new TagLib.IPicture[] { cover };
-            tFile.Save();
+            webclient.DownloadFileCompleted += wc_DownloadFileCompleted;  
         }
 
 
-        public static async Task<MusicInfo> getInfos(string url)
+        public static async Task<MusicInfo> getInfos(string localurl)
         {
             var values = new Dictionary<string, string>
             {
-                { "url", url },
+                { "url", localurl },
                 { "info", "true" }
             };
             var content = new FormUrlEncodedContent(values);
-            var response = await (await client.PostAsync("http://savagemc.net:3001/song", content)).Content.ReadAsStringAsync();
+            var response = await (await client.PostAsync("http://localhost:3001/song", content)).Content.ReadAsStringAsync();
+            Console.WriteLine(response);
             return JsonConvert.DeserializeObject<MusicInfo>(response);
         }
 
@@ -98,16 +64,41 @@ namespace YoutubeDownloaderClient
             ms.Close();
         }
 
-        public static void AddMp3Tags(string path)
+        private static async void wc_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            TagLib.File file = TagLib.File.Create(path);
-            setCover(path);
-            file.Tag.Title = "GAYPORN";
-            file.Tag.Performers = "JAN, Alex".Split(',');
-            file.Tag.Album = "HOMO";
-            file.Tag.Track = (uint)1;
-            file.Tag.Year = (uint)2018;
-            file.Save();
+
+            var imageBytes = File.ReadAllBytes(outputPath);
+
+            var values = new Dictionary<string, string>
+            {
+                { "url", url },
+            };
+
+            var content = new FormUrlEncodedContent(values);
+
+            var response = await client.PostAsync("http://localhost:3001/song", content);
+
+            string fileName = info.songName + ".mp3";
+
+            await using var ms = await response.Content.ReadAsStreamAsync();
+            await using var fs = File.Create(fileName);
+            ms.Seek(0, SeekOrigin.Begin);
+            ms.CopyTo(fs);
+            fs.Close();
+            ms.Close();
+            var tFile = TagLib.File.Create(fileName);
+
+            var cover = new TagLib.Id3v2.AttachmentFrame
+            {
+                Type = TagLib.PictureType.FrontCover,
+                Description = "Cover",
+                MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg,
+                Data = imageBytes,
+                TextEncoding = TagLib.StringType.UTF16
+            };
+
+            tFile.Tag.Pictures = new TagLib.IPicture[] { cover };
+            tFile.Save();
         }
     }
 }
