@@ -5,7 +5,9 @@ import rimraf from "rimraf";
 import fs from "fs";
 import path from "path";
 
-const pathToFfmpeg = process.env.production ? "/usr/bin/ffmpeg" : "./ffmpeg/bin/ffmpeg.exe";
+console.log(process.env.production);
+
+const pathToFfmpeg = process.env.production === "production" ? "/usr/bin/ffmpeg" : "./ffmpeg/bin/ffmpeg.exe";
 
 function getId(url: string): string {
   var video_id = url.split("v=")[1];
