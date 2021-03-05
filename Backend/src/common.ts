@@ -5,7 +5,7 @@ import rimraf from "rimraf";
 import fs from "fs";
 import path from "path";
 
-const pathToFfmpeg = "./ffmpeg/bin/ffmpeg.exe";
+const pathToFfmpeg = process.env.production ? "/usr/bin/ffmpeg" : "./ffmpeg/bin/ffmpeg.exe";
 
 function getId(url: string): string {
   var video_id = url.split("v=")[1];
@@ -22,10 +22,6 @@ async function getName(url: string) {
     "https://noembed.com/embed?url=https://www.youtube.com/watch?v=" +
     getId(url);
 
-  console.log(httpUrl);
-  console.log(httpUrl);
-  console.log(httpUrl);
-
   const data = JSON.parse(await (await fetch(httpUrl)).text());
 
   return data.title;
@@ -33,7 +29,7 @@ async function getName(url: string) {
 
 async function downloadSong(
   id: string,
-  callback: (fileOutput: string) => void
+  callback: (fileOutput: string, usedPath: string, songName: string) => void
 ): Promise<void> {
   const downloadPath = `./downloads/${id}/`;
 
@@ -60,7 +56,7 @@ async function downloadSong(
   YD.on("finished", () => {
     const filePath = fs.readdirSync(outputPath)[0];
 
-    callback(path.join(outputPath, filePath));
+    callback(path.join(outputPath, filePath), outputPath, filePath);
   });      
 }
 
@@ -68,4 +64,4 @@ function delay(ms: number) {
   return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
-export { downloadSong, getId, getName };
+export { downloadSong, getId, getName, pathToFfmpeg };

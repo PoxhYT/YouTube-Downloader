@@ -1,4 +1,5 @@
-import { downloadSong, getId, getName } from "./common";
+import { downloadSong, getId, getName, pathToFfmpeg } from "./common";
+import { spawn } from "child_process";
 
 import bodyParser from "body-parser";
 import express from "express";
@@ -44,8 +45,17 @@ app.post("/song", async (req, res) => {
     return;
   }
 
-  downloadSong(getId(url), (pathToFile) => {
-    res.sendFile(pathToFile);
+  downloadSong(getId(url), (pathToFile, outputPath, songName) => {
+    const fixedMp3 = path.join(outputPath, "fixed.mp3");
+    const command = spawn(pathToFfmpeg, ["-i", pathToFile, "-codec:a", "libmp3lame", "-b:a", "320k", fixedMp3]);
+
+    command.on('error', (error) => {
+      res.status(500).json({message: "Something wen't wrong...", error: JSON.stringify(error)});
+    });
+
+    command.on("close", code => {
+      res.sendFile(fixedMp3);
+    });
   });
 });
 
