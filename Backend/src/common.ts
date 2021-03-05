@@ -2,12 +2,10 @@ import YoutubeMp3Downloader from "youtube-mp3-downloader";
 
 import fetch from "node-fetch";
 import rimraf from "rimraf";
-import fs from "fs";
 import path from "path";
+import fs from "fs";
 
-console.log(process.env.production);
-
-const pathToFfmpeg = process.env.production === "production" ? "/usr/bin/ffmpeg" : "./ffmpeg/bin/ffmpeg.exe";
+const pathToFfmpeg = process.env.NODE_ENV === "production" ? "/usr/bin/ffmpeg" : "./ffmpeg/bin/ffmpeg.exe";
 
 function getId(url: string): string {
   var video_id = url.split("v=")[1];
